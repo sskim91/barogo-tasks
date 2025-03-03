@@ -1,6 +1,7 @@
 package com.barogo.app.repository;
 
 import com.barogo.app.domain.Delivery;
+import com.barogo.app.domain.DeliveryStatus;
 import com.barogo.app.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,15 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
     Optional<Delivery> findByIdAndUser(Long id, User user);
 
-    Page<Delivery> findByUserAndRequestedAtBetween(User user, LocalDateTime start, LocalDateTime end, Pageable pageable);
+    Page<Delivery> findByUserAndRequestedAtBetween(User user,
+                                                   LocalDateTime start,
+                                                   LocalDateTime end,
+                                                   Pageable pageable);
 
+    Page<Delivery> findByUserAndRequestedAtBetweenAndStatus(User user,
+                                                            LocalDateTime start,
+                                                            LocalDateTime end,
+                                                            DeliveryStatus status,
+                                                            Pageable pageable
+    );
 }
