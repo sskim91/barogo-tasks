@@ -30,10 +30,9 @@ public class JwtTokenProvider {
      * 생성자
      * application.properties에서 JWT 관련 설정값을 주입받음
      */
-    public JwtTokenProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds,
-            UserDetailsService userDetailsService) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secret,
+                            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds,
+                            UserDetailsService userDetailsService) {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;

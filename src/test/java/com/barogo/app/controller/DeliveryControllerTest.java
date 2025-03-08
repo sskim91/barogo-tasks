@@ -3,9 +3,11 @@ package com.barogo.app.controller;
 import com.barogo.app.config.TestSecurityConfig;
 import com.barogo.app.domain.DeliveryStatus;
 import com.barogo.app.dto.request.DeliverySearchRequestDto;
+import com.barogo.app.dto.request.UpdateDestinationRequestDto;
 import com.barogo.app.dto.response.DeliveryResponseDto;
 import com.barogo.app.exception.UserNameNotFoundException;
 import com.barogo.app.service.DeliveryService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -38,6 +41,9 @@ class DeliveryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private DeliveryService deliveryService;
@@ -188,6 +194,9 @@ class DeliveryControllerTest {
         Long deliveryId = 1L;
         String newDestinationAddress = "새로운도착지주소";
 
+        UpdateDestinationRequestDto requestDto = new UpdateDestinationRequestDto();
+        requestDto.setDestinationAddress(newDestinationAddress);
+
         DeliveryResponseDto updatedDelivery = DeliveryResponseDto.builder()
                 .id(deliveryId)
                 .status(DeliveryStatus.RECEIVED)
@@ -202,7 +211,8 @@ class DeliveryControllerTest {
 
         // when & then
         mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}/destination", deliveryId)
-                        .param("destinationAddress", newDestinationAddress))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))

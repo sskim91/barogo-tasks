@@ -57,7 +57,7 @@ class UserControllerTest {
         given(userService.signUp(any(SignUpRequestDto.class))).willReturn(responseDto);
 
         // when & then
-        mockMvc.perform(post("/api/v1/user/signup")
+        mockMvc.perform(post("/api/v1/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -79,7 +79,7 @@ class UserControllerTest {
         request.setName(""); // 비어있음
 
         // when & then
-        mockMvc.perform(post("/api/v1/user/signup")
+        mockMvc.perform(post("/api/v1/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -99,7 +99,7 @@ class UserControllerTest {
         given(userService.login(any(LoginRequestDto.class))).willReturn(responseDto);
 
         // when & then
-        mockMvc.perform(post("/api/v1/user/login")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -119,7 +119,7 @@ class UserControllerTest {
         request.setPassword(""); // 비어있음
 
         // when & then
-        mockMvc.perform(post("/api/v1/user/login")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
