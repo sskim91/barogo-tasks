@@ -37,10 +37,9 @@ public class DeliveryController {
      * @return 페이지네이션된 배달 목록
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponseDto<DeliveryResponseDto>>> getDeliveries(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @ModelAttribute DeliverySearchRequestDto searchRequest,
-            @PageableDefault(sort = "requestedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<ApiResponse<PageResponseDto<DeliveryResponseDto>>> getDeliveries(@AuthenticationPrincipal UserDetails userDetails,
+                                                                                           @Valid @ModelAttribute DeliverySearchRequestDto searchRequest,
+                                                                                           @PageableDefault(sort = "requestedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<DeliveryResponseDto> pageResult = deliveryService.getDeliveriesByDateRange(
                 userDetails.getUsername(), searchRequest, pageable);
@@ -69,10 +68,9 @@ public class DeliveryController {
      * @return 업데이트된 배달 정보
      */
     @PatchMapping("/{deliveryId}/destination")
-    public ResponseEntity<ApiResponse<DeliveryResponseDto>> updateDeliveryDestination(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable Long deliveryId,
-            @Valid @RequestBody UpdateDestinationRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<DeliveryResponseDto>> updateDeliveryDestination(@AuthenticationPrincipal UserDetails userDetails,
+                                                                                      @PathVariable Long deliveryId,
+                                                                                      @Valid @RequestBody UpdateDestinationRequestDto requestDto) {
 
         DeliveryResponseDto updatedDelivery = deliveryService.updateDeliveryDestination(
                 userDetails.getUsername(), deliveryId, requestDto.getDestinationAddress());

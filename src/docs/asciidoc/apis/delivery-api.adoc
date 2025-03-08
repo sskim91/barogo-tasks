@@ -1,0 +1,48 @@
+[[delivery-api]]
+== 배달 API
+
+[[delivery-search]]
+=== 배달 조회 API
+
+`GET /api/v1/deliveries` 배달 조회 API입니다. 기간 기반으로 배달 목록을 조회합니다.
+
+==== 요청 구조
+
+include::{snippets}/delivery-search/http-request.adoc[]
+
+==== 요청 파라미터
+
+include::{snippets}/delivery-search/query-parameters.adoc[]
+
+==== 응답 구조
+
+include::{snippets}/delivery-search/http-response.adoc[]
+
+==== 응답 필드
+
+include::{snippets}/delivery-search/response-fields.adoc[]
+
+[[delivery-update-destination]]
+=== 배달 주소 변경 API
+
+`PATCH /api/v1/deliveries/{deliveryId}/destination` 배달 주소 변경 API입니다.
+
+==== 요청 구조
+
+include::{snippets}/delivery-update-destination/http-request.adoc[]
+
+==== 경로 파라미터
+
+include::{snippets}/delivery-update-destination/path-parameters.adoc[]
+
+==== 요청 필드
+
+include::{snippets}/delivery-update-destination/request-fields.adoc[]
+
+==== 응답 구조
+
+include::{snippets}/delivery-update-destination/http-response.adoc[]
+
+==== 응답 필드
+
+include::{snippets}/delivery-update-destination/response-fields.adoc[]

@@ -228,12 +228,16 @@ class DeliveryControllerTest {
         Long nonExistentDeliveryId = 999L;
         String newDestinationAddress = "새로운도착지주소";
 
+        UpdateDestinationRequestDto requestDto = new UpdateDestinationRequestDto();
+        requestDto.setDestinationAddress(newDestinationAddress);
+
         doThrow(new IllegalStateException("해당 배달을 찾을 수 없거나 접근 권한이 없습니다."))
                 .when(deliveryService).updateDeliveryDestination(anyString(), anyLong(), anyString());
 
         // when & then
         mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}/destination", nonExistentDeliveryId)
-                        .param("destinationAddress", newDestinationAddress))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -246,12 +250,16 @@ class DeliveryControllerTest {
         Long deliveryId = 1L;
         String newDestinationAddress = "새로운도착지주소";
 
+        UpdateDestinationRequestDto requestDto = new UpdateDestinationRequestDto();
+        requestDto.setDestinationAddress(newDestinationAddress);
+
         doThrow(new IllegalStateException("배달이 진행 중이거나 완료된 경우에는 주소를 변경할 수 없습니다. 현재 상태: 배달 중"))
                 .when(deliveryService).updateDeliveryDestination(anyString(), anyLong(), anyString());
 
         // when & then
         mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}/destination", deliveryId)
-                        .param("destinationAddress", newDestinationAddress))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }

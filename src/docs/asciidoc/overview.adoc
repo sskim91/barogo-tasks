@@ -1,0 +1,71 @@
+[[overview]]
+== 개요
+
+[[overview-http-verbs]]
+=== HTTP 동사
+
+본 API에서 사용하는 HTTP 동사(methods)는 가능한 한 REST 규약을 따릅니다.
+
+|===
+| 동사 | 용례
+
+| `GET`
+| 리소스를 조회할 때 사용
+
+| `POST`
+| 새 리소스를 생성할 때 사용
+
+| `PATCH`
+| 기존 리소스를 일부 수정할 때 사용
+
+| `PUT`
+| 기존 리소스를 완전히 대체할 때 사용
+
+| `DELETE`
+| 기존 리소스를 삭제할 때 사용
+|===
+
+[[overview-http-status-codes]]
+=== HTTP 상태 코드
+
+본 API에서 사용하는 HTTP 상태 코드는 가능한 한 REST 규약을 따릅니다.
+
+|===
+| 상태 코드 | 용례
+
+| `200 OK`
+| 요청을 성공적으로 처리함
+
+| `400 Bad Request`
+| 잘못된 요청이 들어옴
+
+| `401 Unauthorized`
+| 인증되지 않은 사용자가 요청함
+
+| `403 Forbidden`
+| 인증된 사용자가 권한이 없는 리소스에 접근함
+
+| `404 Not Found`
+| 요청한 리소스가 존재하지 않음
+
+| `500 Internal Server Error`
+| 서버 내부 오류가 발생함
+|===
+
+[[overview-response-structure]]
+=== 응답 구조
+
+모든 API 응답은 다음과 같은 공통 구조를 가집니다:
+
+[source,json]
+----
+{
+  "success": true,
+  "message": "요청이 성공적으로 처리되었습니다.",
+  "data": { ... }
+}
+----
+
+* `success`: 요청 성공 여부 (boolean)
+* `message`: 응답 메시지 (string)
+* `data`: 실제 응답 데이터 (object)
