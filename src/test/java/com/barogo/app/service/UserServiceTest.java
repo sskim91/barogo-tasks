@@ -1,11 +1,13 @@
 package com.barogo.app.service;
 
 import com.barogo.app.config.jwt.JwtTokenProvider;
+import com.barogo.app.domain.RefreshToken;
 import com.barogo.app.domain.User;
 import com.barogo.app.dto.request.LoginRequestDto;
 import com.barogo.app.dto.request.SignUpRequestDto;
 import com.barogo.app.dto.response.TokenResponseDto;
 import com.barogo.app.dto.response.UserInfoResponseDto;
+import com.barogo.app.repository.RefreshTokenRepository;
 import com.barogo.app.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +34,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -109,6 +115,10 @@ class UserServiceTest {
         given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
         given(jwtTokenProvider.createToken(anyString())).willReturn("test.jwt.token");
         given(jwtTokenProvider.getTokenValidityInSeconds()).willReturn(3600L);
+        given(jwtTokenProvider.createRefreshToken()).willReturn("test.refresh.token");
+        given(jwtTokenProvider.getRefreshTokenValidityInSeconds()).willReturn(604800L);
+        given(jwtTokenProvider.getExpiryDateFromToken("test.refresh.token"))
+                .willReturn(LocalDateTime.now().plusDays(7));
 
         // when
         TokenResponseDto result = userService.login(request);
@@ -116,12 +126,17 @@ class UserServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getAccessToken()).isEqualTo("test.jwt.token");
+        assertThat(result.getRefreshToken()).isEqualTo("test.refresh.token");
         assertThat(result.getTokenType()).isEqualTo("Bearer");
-        assertThat(result.getExpiresIn()).isEqualTo(3600L);
+        assertThat(result.getAccessTokenExpiresIn()).isEqualTo(3600L);
+        assertThat(result.getRefreshTokenExpiresIn()).isEqualTo(604800L);
+
 
         verify(userRepository, times(1)).findByUsername(anyString());
         verify(passwordEncoder, times(1)).matches(anyString(), anyString());
         verify(jwtTokenProvider, times(1)).createToken(anyString());
+        verify(jwtTokenProvider, times(1)).createRefreshToken();
+        verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
     }
 
     @Test

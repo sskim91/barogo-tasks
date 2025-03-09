@@ -16,6 +16,8 @@ import org.springframework.util.StringUtils;
 import java.security.Key;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Slf4j
@@ -25,6 +27,9 @@ public class JwtTokenProvider {
     private final Key key;
     private final long tokenValidityInMilliseconds;
     private final UserDetailsService userDetailsService;
+
+    @Value("${jwt.refresh-token-validity-in-seconds}") // 기본값 7일
+    private long refreshTokenValidityInSeconds;
 
     /**
      * 생성자
@@ -114,5 +119,33 @@ public class JwtTokenProvider {
      */
     public long getTokenValidityInSeconds() {
         return tokenValidityInMilliseconds / 1000;
+    }
+
+    // 리프레시 토큰 생성 메서드 추가
+    public String createRefreshToken() {
+        Instant now = Instant.now();
+        Instant validity = now.plus(Duration.ofSeconds(refreshTokenValidityInSeconds));
+
+        return Jwts.builder()
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(validity))
+                .signWith(key)
+                .compact();
+    }
+
+    // 토큰 유효기간 계산 메서드
+    public LocalDateTime getExpiryDateFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith((javax.crypto.SecretKey) key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return LocalDateTime.ofInstant(claims.getExpiration().toInstant(), ZoneId.systemDefault());
+    }
+
+    // 리프레시 토큰 유효 시간 반환
+    public long getRefreshTokenValidityInSeconds() {
+        return refreshTokenValidityInSeconds;
     }
 }

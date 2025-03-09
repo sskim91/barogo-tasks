@@ -1,6 +1,7 @@
 package com.barogo.app.docs;
 
 import com.barogo.app.dto.request.LoginRequestDto;
+import com.barogo.app.dto.request.RefreshTokenRequestDto;
 import com.barogo.app.dto.request.SignUpRequestDto;
 import com.barogo.app.dto.response.TokenResponseDto;
 import com.barogo.app.dto.response.UserInfoResponseDto;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,7 +25,9 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -109,7 +113,14 @@ public class UserControllerDocTest {
         request.setUsername("testuser");
         request.setPassword("StrongPassword123!");
 
-        TokenResponseDto responseDto = new TokenResponseDto("test.jwt.token", "Bearer", 3600L);
+        // 업데이트된 TokenResponseDto 객체 생성
+        TokenResponseDto responseDto = new TokenResponseDto(
+                "test.jwt.token",
+                "test.refresh.token",
+                "Bearer",
+                3600L,
+                604800L
+        );
 
         given(userService.login(any(LoginRequestDto.class))).willReturn(responseDto);
 
@@ -130,8 +141,74 @@ public class UserControllerDocTest {
                                 fieldWithPath("success").type(BOOLEAN).description("요청 성공 여부"),
                                 fieldWithPath("message").type(STRING).description("응답 메시지"),
                                 fieldWithPath("data.accessToken").type(STRING).description("JWT 액세스 토큰"),
+                                fieldWithPath("data.refreshToken").type(STRING).description("JWT 리프레시 토큰"),
                                 fieldWithPath("data.tokenType").type(STRING).description("토큰 유형"),
-                                fieldWithPath("data.expiresIn").type(NUMBER).description("토큰 만료 시간(초)")
+                                fieldWithPath("data.accessTokenExpiresIn").type(NUMBER).description("액세스 토큰 만료 시간(초)"),
+                                fieldWithPath("data.refreshTokenExpiresIn").type(NUMBER).description("리프레시 토큰 만료 시간(초)")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("토큰 갱신 API 문서화")
+    void refreshTokenDocTest() throws Exception {
+        // given
+        RefreshTokenRequestDto request = new RefreshTokenRequestDto();
+        request.setRefreshToken("test.refresh.token");
+
+        TokenResponseDto responseDto = new TokenResponseDto(
+                "new.access.token",
+                "test.refresh.token",
+                "Bearer",
+                3600L,
+                604800L
+        );
+
+        given(userService.refreshToken(anyString())).willReturn(responseDto);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("user-refresh-token",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("refreshToken").description("JWT 리프레시 토큰")
+                        ),
+                        responseFields(
+                                fieldWithPath("success").type(BOOLEAN).description("요청 성공 여부"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data.accessToken").type(STRING).description("새로 발급된 JWT 액세스 토큰"),
+                                fieldWithPath("data.refreshToken").type(STRING).description("기존 JWT 리프레시 토큰"),
+                                fieldWithPath("data.tokenType").type(STRING).description("토큰 유형"),
+                                fieldWithPath("data.accessTokenExpiresIn").type(NUMBER).description("액세스 토큰 만료 시간(초)"),
+                                fieldWithPath("data.refreshTokenExpiresIn").type(NUMBER).description("리프레시 토큰 만료 시간(초)")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("로그아웃 API 문서화")
+    @WithMockUser(username = "testuser")
+    void logoutDocTest() throws Exception {
+        // given
+        doNothing().when(userService).logout(anyString());
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("user-logout",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("success").type(BOOLEAN).description("요청 성공 여부"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data").type(NULL).description("데이터 없음")
                         )
                 ));
     }

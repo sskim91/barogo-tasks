@@ -2,6 +2,7 @@ package com.barogo.app.controller;
 
 import com.barogo.app.config.TestSecurityConfig;
 import com.barogo.app.dto.request.LoginRequestDto;
+import com.barogo.app.dto.request.RefreshTokenRequestDto;
 import com.barogo.app.dto.request.SignUpRequestDto;
 import com.barogo.app.dto.response.TokenResponseDto;
 import com.barogo.app.dto.response.UserInfoResponseDto;
@@ -14,12 +15,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -94,7 +100,14 @@ class UserControllerTest {
         request.setUsername("testuser");
         request.setPassword("StrongPassword123!");
 
-        TokenResponseDto responseDto = new TokenResponseDto("test.jwt.token", "Bearer", 3600L);
+        // 변경된 TokenResponseDto에 맞게 응답 객체 생성
+        TokenResponseDto responseDto = new TokenResponseDto(
+                "test.jwt.token",
+                "test.refresh.token",
+                "Bearer",
+                3600L,
+                604800L
+        );
 
         given(userService.login(any(LoginRequestDto.class))).willReturn(responseDto);
 
@@ -106,8 +119,10 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").value("test.jwt.token"))
+                .andExpect(jsonPath("$.data.refreshToken").value("test.refresh.token"))
                 .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
-                .andExpect(jsonPath("$.data.expiresIn").value(3600));
+                .andExpect(jsonPath("$.data.accessTokenExpiresIn").value(3600))
+                .andExpect(jsonPath("$.data.refreshTokenExpiresIn").value(604800));
     }
 
     @Test
@@ -124,5 +139,58 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("토큰 갱신 API 테스트")
+    void refreshTokenTest() throws Exception {
+        // given
+        RefreshTokenRequestDto request = new RefreshTokenRequestDto();
+        request.setRefreshToken("test.refresh.token");
+
+        TokenResponseDto responseDto = new TokenResponseDto(
+                "new.jwt.token",
+                "test.refresh.token",
+                "Bearer",
+                3600L,
+                604800L
+        );
+
+        given(userService.refreshToken(any(String.class))).willReturn(responseDto);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.accessToken").value("new.jwt.token"))
+                .andExpect(jsonPath("$.data.refreshToken").value("test.refresh.token"))
+                .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.data.accessTokenExpiresIn").value(3600))
+                .andExpect(jsonPath("$.data.refreshTokenExpiresIn").value(604800));
+    }
+
+    @Test
+    @DisplayName("로그아웃 API 테스트")
+    @WithMockUser(username = "testuser")
+    void logoutTest() throws Exception {
+        // given
+        UserDetails userDetails = User.builder()
+                .username("testuser")
+                .password("password")
+                .authorities(Collections.emptyList())
+                .build();
+
+        doNothing().when(userService).logout("testuser");
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/logout")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").exists());
     }
 }

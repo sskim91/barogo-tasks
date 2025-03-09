@@ -42,3 +42,41 @@ include::{snippets}/user-login/http-response.adoc[]
 ==== 응답 필드
 
 include::{snippets}/user-login/response-fields.adoc[]
+
+[[user-refresh-token]]
+=== 토큰 갱신 API
+
+`POST /api/v1/users/refresh` 토큰 갱신 API입니다. 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.
+
+==== 요청 구조
+
+include::{snippets}/user-refresh-token/http-request.adoc[]
+
+==== 요청 필드
+
+include::{snippets}/user-refresh-token/request-fields.adoc[]
+
+==== 응답 구조
+
+include::{snippets}/user-refresh-token/http-response.adoc[]
+
+==== 응답 필드
+
+include::{snippets}/user-refresh-token/response-fields.adoc[]
+
+[[user-logout]]
+=== 로그아웃 API
+
+`POST /api/v1/users/logout` 로그아웃 API입니다. 현재 사용자의 리프레시 토큰을 무효화합니다.
+
+==== 요청 구조
+
+include::{snippets}/user-logout/http-request.adoc[]
+
+==== 응답 구조
+
+include::{snippets}/user-logout/http-response.adoc[]
+
+==== 응답 필드
+
+include::{snippets}/user-logout/response-fields.adoc[]
