@@ -45,16 +45,13 @@ public class DeliveryService {
         // 검색 기간 유효성 검증
         validateSearchPeriod(searchRequest);
 
-        // 사용자 조회
-        User user = getUserByUsername(username);
-
         // 배달 상태 필터 적용 여부에 따라 다른 쿼리 사용
         Page<Delivery> deliveries;
         if (searchRequest.getStatus() != null) {
             // 상태 필터가 있는 경우, 커스텀 쿼리 메서드를 호출해야 함
             // 아래 메서드는 Repository에 추가 구현 필요
-            deliveries = deliveryRepository.findByUserAndRequestedAtBetweenAndStatus(
-                    user,
+            deliveries = deliveryRepository.findByUsernameAndRequestedAtBetweenAndStatus(
+                    username,
                     searchRequest.getStartDate(),
                     searchRequest.getEndDate(),
                     searchRequest.getStatus(),
@@ -62,8 +59,8 @@ public class DeliveryService {
             );
         } else {
             // 상태 필터가 없는 경우
-            deliveries = deliveryRepository.findByUserAndRequestedAtBetween(
-                    user,
+            deliveries = deliveryRepository.findByUsernameAndRequestedAtBetween(
+                    username,
                     searchRequest.getStartDate(),
                     searchRequest.getEndDate(),
                     pageable

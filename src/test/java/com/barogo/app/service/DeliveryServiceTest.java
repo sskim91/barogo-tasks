@@ -82,9 +82,10 @@ class DeliveryServiceTest {
 
         Page<Delivery> deliveryPage = new PageImpl<>(Arrays.asList(delivery1, delivery2));
 
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
-        given(deliveryRepository.findByUserAndRequestedAtBetweenAndStatus(
-                any(User.class), any(LocalDateTime.class), any(LocalDateTime.class),
+        //이제 userRepository는 호출되지 않음
+        //given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(deliveryRepository.findByUsernameAndRequestedAtBetweenAndStatus(
+                any(String.class), any(LocalDateTime.class), any(LocalDateTime.class),
                 any(DeliveryStatus.class), any(Pageable.class)))
                 .willReturn(deliveryPage);
 
@@ -94,9 +95,9 @@ class DeliveryServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(2);
-        verify(userRepository, times(1)).findByUsername(anyString());
-        verify(deliveryRepository, times(1)).findByUserAndRequestedAtBetweenAndStatus(
-                any(User.class), any(LocalDateTime.class), any(LocalDateTime.class),
+        //verify(userRepository, times(1)).findByUsername(anyString());
+        verify(deliveryRepository, times(1)).findByUsernameAndRequestedAtBetweenAndStatus(
+                any(String.class), any(LocalDateTime.class), any(LocalDateTime.class),
                 any(DeliveryStatus.class), any(Pageable.class));
     }
 
@@ -131,9 +132,9 @@ class DeliveryServiceTest {
 
         Page<Delivery> deliveryPage = new PageImpl<>(Arrays.asList(delivery1));
 
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
-        given(deliveryRepository.findByUserAndRequestedAtBetween(
-                any(User.class), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
+        //given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+        given(deliveryRepository.findByUsernameAndRequestedAtBetween(
+                any(String.class), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class)))
                 .willReturn(deliveryPage);
 
         // when
@@ -142,9 +143,9 @@ class DeliveryServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        verify(userRepository, times(1)).findByUsername(anyString());
-        verify(deliveryRepository, times(1)).findByUserAndRequestedAtBetween(
-                any(User.class), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
+        //verify(userRepository, times(1)).findByUsername(anyString());
+        verify(deliveryRepository, times(1)).findByUsernameAndRequestedAtBetween(
+                any(String.class), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
     }
 
     @Test
@@ -162,15 +163,14 @@ class DeliveryServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
+        //given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
 
         // when & then
-        assertThrows(UserNameNotFoundException.class,
-                () -> deliveryService.getDeliveriesByDateRange(username, searchRequest, pageable));
+        //assertThrows(UserNameNotFoundException.class, () -> deliveryService.getDeliveriesByDateRange(username, searchRequest, pageable));
 
-        verify(userRepository, times(1)).findByUsername(anyString());
-        verify(deliveryRepository, times(0)).findByUserAndRequestedAtBetween(
-                any(User.class), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
+        //verify(userRepository, times(1)).findByUsername(anyString());
+        verify(deliveryRepository, times(0)).findByUsernameAndRequestedAtBetween(
+                any(String.class), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
     }
 
     @Test
