@@ -99,16 +99,16 @@ public class DeliveryControllerDocTest {
 
         // when & then
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/deliveries")
-                        .param("startDate", startDate.format(DateTimeFormatter.ISO_DATE_TIME))
-                        .param("endDate", endDate.format(DateTimeFormatter.ISO_DATE_TIME))
+                        .param("startDate", startDate.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                        .param("endDate", endDate.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
                         .param("status", "RECEIVED"))
                 .andExpect(status().isOk())
                 .andDo(document("delivery-search",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
-                                parameterWithName("startDate").description("조회 시작일 (ISO DateTime 형식)"),
-                                parameterWithName("endDate").description("조회 종료일 (ISO DateTime 형식)"),
+                                parameterWithName("startDate").description("조회 시작일 (yyyyMMddHHmmss 형식)"),
+                                parameterWithName("endDate").description("조회 종료일 (yyyyMMddHHmmss 형식)"),
                                 parameterWithName("status").description("배달 상태 필터 (선택사항)").optional(),
                                 parameterWithName("page").description("페이지 번호 (0부터 시작, 기본값 0)").optional(),
                                 parameterWithName("size").description("페이지 크기 (기본값 10)").optional(),
