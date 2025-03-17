@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // 회원가입, 로그인, H2 콘솔은 누구나 접근 가능
-                        .requestMatchers("/api/v1/users/signup", "/api/v1/users/login").permitAll()
+                        .requestMatchers("/api/v1/users/signup", "/api/v1/users/login", "/api/v1/users/refresh").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()

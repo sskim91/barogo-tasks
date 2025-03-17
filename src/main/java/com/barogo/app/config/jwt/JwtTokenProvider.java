@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final Key key;
+    private final SecretKey key;
     private final long tokenValidityInMilliseconds;
     private final UserDetailsService userDetailsService;
 
@@ -65,7 +65,7 @@ public class JwtTokenProvider {
      */
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parser()
-                .verifyWith((javax.crypto.SecretKey) key)
+                .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -98,7 +98,7 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                    .verifyWith((javax.crypto.SecretKey) key)
+                    .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
             return true;
